@@ -1,0 +1,21 @@
+id,color,variety,bottle
+1,white,pinot grigio,A
+2,white,pinot grigio,B
+3,white,chardonnay,A
+4,white,chardonnay,B
+5,white,chardonnay,C
+6,white,vermentino,A
+7,white,moscato,A
+8,white,gewurztraminer,A
+9,white,sauvignon,A
+10,white,pinot grigio,C
+11,red,merlot,A
+12,red,merlot,B
+13,red,lagrein,A
+14,red,lagrein,B
+15,red,sangiovese,A
+16,red,sangiovese,B
+17,red,pinot noir,A
+18,red,pinot noir,B
+19,red,cannonau,A
+20,red,frappato shiraz,A
