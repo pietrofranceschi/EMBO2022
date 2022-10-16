@@ -38,9 +38,8 @@ In the last years a huge effort has been made to set up a full `xcms` centric ec
 For our demo we will use a subset of a dataset on wines which have been recently acquired at the Fondazione E. Mach in Italy (many thanks to Dr. Mar Garcia Aloy). The dataset has been designed for training purposes and includes MS and DDA (MS2 e MS3) (in positive and negative polarity) acquisition of a 20 wines with the following characteristics:
 
 * two colors: red(10), white(10)
-* three years: 2019, 2020, 2021
 * 12 varieties
-* What is dolomiti???
+
 
 The acquisition sequences included blanks, pooled QC and samples. Al data were acquired with a UPLC-LTQ-Orbitrap instrument. A set of standard injections is also available to illustrate the annotation strategy.
 
@@ -112,14 +111,14 @@ I <- intensity(fs_raw)
 And their structure ...
 
 ```{r}
-str(mz[1:4])
+glimpse(mz[1:4])
 ```
 
 ```{r}
-str(I[1:4])
+glimpse(I[1:4])
 ```
 
-So both object are lists: for every scan we have a vector of `mz` and a vector of `I`: a spectrum. 
+So both object are lists: for every scan we have a vector of `mz` and a vector of `I`: a spectrum. We have 3D data!
 
 ### Plot by hand
 
@@ -184,11 +183,37 @@ plot(rtime(chr_raw[1,1]), intensity(chr_raw[1,1]), type = "b")
 
 Note: the structure of the `Mchromatograms` is "matrix like" because it is designed to work best with many ions and many files.
 
+Just to show what I mean let's read in the data coming from two different injections
+
+```{r}
+two_raw <- readMSData(
+  files = c("data/x016_X_QC_X_4_NEG_DDA.mzML","data/x020_wht_gewurz_A_1_NEG_DDA.mzML"),
+  msLevel. = 1, ## we read only MS1 and MS2
+  mode = "onDisk")  ## with this parameter the data are not loaded into RAM
+```
+
+
+As before we "slice" an extracted ion chromatogram
+
+```{r}
+# extract the chromatogram
+chr_raw_2 <- chromatogram(two_raw, 
+                        mz = 295.0445 + 0.01*c(-1, 1), 
+                        rt = 250 + 60*c(-1, 1))
+
+chr_raw_2
+```
+
+Here we could extract the rt and intensity for the separate files, but we can plot them with a handy `xcms` method
+
 The plot can be also obtained by a specific method, which is also giving some additional info
 
 ```{r}
-plot(chr_raw)
+plot(chr_raw_2)
 ```
+
+Here we see a clear difference between the two traces, looking to the names we see that one datafile is a QC, while the second is one injection of a white wine (`wht`)... food for brains !  ;-)
+
 
 **Note** The previous plot shows a typical characteristics of Orbitrap (and in general FT) instruments: the signal off peaks is almost invariably zero. As we will see this can be a problem in presence of missing data, since no "real" noise can be integrated there.
 

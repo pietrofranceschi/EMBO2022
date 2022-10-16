@@ -1,0 +1,200 @@
+---
+title: "Picking Peaks"
+author: "Pietro Franceschi"
+date: "`r Sys.Date()`"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r message=FALSE, warning=FALSE}
+library(xcms)
+library(Spectra)
+library(tidyverse)
+library(plotly)
+```
+
+## Introduction
+
+A fast recap about what we know about metabolites in LC-MS ...
+
+* Every metabolite is more-or-less separated by the chromatographic column in time. 
+* In the ideal world, every metabolite would "elute" in a narrow time window: we do not live in an ideal world
+* Inside the ionization source every metabolite is transformed in a cloud of ions (fragments, isotopes, adducts, ...)
+
+So every metabolite ...
+
+* produces a peak in the ion "current" of all the ions produced during its ionization
+* every metabolites produces peaks in more than one ionic trace
+* in many cases the same ion could be produced in the ionization of different metabolites
+
+
+So ...
+
+* to find metabolites we have to automatically look for peaks in the mz/rt plane
+* we will have much more peaks than metabolites. And this will make the analysis of our data matrix extremely challenging
+
+
+
+## Peak Picking
+
+The process of finding peaks in the data is called *peak picking*. It can be done in many different ways, and actually every software will do it slightly differently. The first step in the analysis of our dataset will be to pick the peaks in the full set of samples. Here I'll show you the process on one file,
+
+There are some important point to remember.
+
+* there is no perfect solution: every algorithms will miss something you would pick
+* anyway an automatic solution is better because it is reproducible
+* every algorithm will have parameters to tune
+* expert knowledge will be useful at some point 
+
+
+Let's start reeding in a raw file 
+
+```{r}
+raw_one <- readMSData(
+  files = "data/x016_X_QC_X_4_NEG_DDA.mzML",
+  msLevel. = c(1,2), ## we read only MS1 and MS2
+  mode = "onDisk")  ## with this parameter the data are not loaded into RAM
+```
+
+I'll now show to you how to perform peak picking with two algoritms availabe in xcms. In the 99% of the case you will use only one of them (CentWave), but it is nice - once in the life - to really put your hands in the machine 
+
+## Peak picking: matched filter
+
+The "older" and most sounding way of finding peaks implemented in `xcms` is the `matched filter` algorithm.
+
+A full description of the parameters of the algorithm can be found in the [`xcms` manual](https://bioconductor.org/packages/release/bioc/manuals/xcms/man/xcms.pdf), here we focus on:
+
+* **binSize:** the "width" of the bins use to extract the ionic traces where we look for peaks
+* **fwhm:** the "expected" width of the peak in the chromatographic direction
+* **snthresh:** the signal/to noise threshold uset to say: "yeah, this is a peak and not a bump in the noise" 
+
+In xcms the parameters of the algorithm are stored into a specific object:
+
+```{r}
+mf <- MatchedFilterParam(binSize = 0.1, 
+                         fwhm = 6, 
+                         snthresh = 5) 
+mf
+```
+
+Now I can use the previous parameters to find the peaks in **one** sample:
+
+```{r}
+
+raw_one_mf_picked <- findChromPeaks(raw_one, param = mf)
+
+raw_one_mf_picked 
+```
+
+Ok, the software did his job. As you can see it was able to fine 638 peaks in this sample. As you can see the `raw_one_mf_picked` still holds peaks and raw data. The peak  table can be extracted with a specific method
+
+
+```{r}
+mf_peaks <- chromPeaks(raw_one_mf_picked) 
+dim(mf_peaks)
+head(mf_peaks, 5)
+```
+
+
+Let's walk to the most relevent columns:
+
+- rownames gives the id of each chromatographic peak. **CPxxx** stands for Chromatographic Peak xxx
+- mz columns identify the mz slice (remember that mz is measured over time so it's slightly changing)
+- rt columns identify the boundaries and the apex of each chromatographic peak
+- into,intf,maxo and maxf are measures of intensity of the peak. What is normally used are maxo and into which are the signal at the apex of the peak and the integral of the signal across the peak area, respectively.
+- sample: in the standar workflow peak picking is performed on all samples, so this column is telling us where each peak was found
+
+
+Let's now give a look to the position of the peaks in the mz/rt plane
+
+```{r}
+mf_peaks %>% 
+  as.data.frame() %>% 
+  ggplot() + 
+  geom_point(aes(x = rt, y = mz, size = sn, col = sn), alpha = 0.7) + 
+  scale_color_viridis_c() + 
+  theme_bw()
+  
+```
+
+If you go back to the previous demo, we were focussing on a specific area of the raw signal whiich was particularly promising
+
+```{r}
+rt <- rtime(raw_one)
+mz <- mz(raw_one)
+I <- intensity(raw_one)
+```
+
+
+
+```{r}
+
+sub_peaks <- mf_peaks %>% 
+  as.data.frame() %>% 
+  filter(mz > 284 & mz < 300) %>% 
+  filter(rt > 200 & rt < 300) 
+
+
+
+ggplotly(tibble(rt = rt, mz = mz, I = I)  %>% 
+  unnest(c("mz","I")) %>%
+  filter(mz > 284 & mz < 300) %>% 
+  filter(rt > 200 & rt < 300) %>% 
+  ggplot() + 
+  geom_point(aes(x = rt, y = mz, col = log10(I), size = I)) + 
+  geom_point(data = sub_peaks, aes(x = rt, y = mz), col = "red", pch = 4, size = 3) + 
+  scale_color_viridis_c() + 
+  theme_light())
+
+```
+
+What we see: 
+
+* the algorithm did a reasonably good job, even if there are several areas with potentially high signal which were not picked
+* as expected many horizontal traces are showing more than one peak! This is the signature that these ions are produced in the ionization of several metabolites
+* something interesting is happening around 250 s: it seems that there many ions are showing a peak, but the position of the maxima is not exactly the same. They could be different metabolites, or maybe the algorithm was not finding the peak maxima at the same rt.
+
+
+This view gives an idea of the boundaries of the peaks
+
+
+```{r}
+tibble(rt = rt, mz = mz, I = I)  %>% 
+  unnest(c("mz","I")) %>%
+  filter(mz > 284 & mz < 300) %>% 
+  filter(rt > 200 & rt < 300) %>% 
+  ggplot() + 
+  geom_point(aes(x = rt, y = mz, col = log10(I), size = I)) + 
+  geom_point(data = sub_peaks, aes(x = rt, y = mz), col = "red", pch = 4, size = 3) + 
+  geom_segment(data = sub_peaks, aes(x = rtmin, xend = rtmax, y = mz, yend = mz), col = "red") + 
+  scale_color_viridis_c() + 
+  theme_light()
+```
+
+So some lines are superimposed, some others not. Tricky bushiness!
+
+
+## Peak Picking Cent Wave
+
+
+
+## Peak Picking all Dataset
+
+
+Read and include the phenodata
+
+Load the peak picked object
+
+
+
+
+
+
+
+
+
+
+
