@@ -11,7 +11,6 @@ knitr::opts_chunk$set(echo = TRUE)
 
 ```{r message=FALSE, warning=FALSE}
 library(xcms)
-library(Spectra)
 library(tidyverse)
 library(plotly)
 ```
@@ -132,7 +131,7 @@ I <- intensity(raw_one)
 
 ```{r}
 
-sub_peaks <- mf_peaks %>% 
+sub_peaks_mf <- mf_peaks %>% 
   as.data.frame() %>% 
   filter(mz > 284 & mz < 300) %>% 
   filter(rt > 200 & rt < 300) 
@@ -145,7 +144,7 @@ ggplotly(tibble(rt = rt, mz = mz, I = I)  %>%
   filter(rt > 200 & rt < 300) %>% 
   ggplot() + 
   geom_point(aes(x = rt, y = mz, col = log10(I), size = I)) + 
-  geom_point(data = sub_peaks, aes(x = rt, y = mz), col = "red", pch = 4, size = 3) + 
+  geom_point(data = sub_peaks_mf, aes(x = rt, y = mz), col = "red", pch = 4, size = 3) + 
   scale_color_viridis_c() + 
   theme_light())
 
@@ -168,25 +167,249 @@ tibble(rt = rt, mz = mz, I = I)  %>%
   filter(rt > 200 & rt < 300) %>% 
   ggplot() + 
   geom_point(aes(x = rt, y = mz, col = log10(I), size = I)) + 
-  geom_point(data = sub_peaks, aes(x = rt, y = mz), col = "red", pch = 4, size = 3) + 
-  geom_segment(data = sub_peaks, aes(x = rtmin, xend = rtmax, y = mz, yend = mz), col = "red") + 
+  geom_point(data = sub_peaks_mf, aes(x = rt, y = mz), col = "red", pch = 4, size = 3) + 
+  geom_segment(data = sub_peaks_mf, aes(x = rtmin, xend = rtmax, y = mz, yend = mz), col = "red") + 
   scale_color_viridis_c() + 
   theme_light()
 ```
 
-So some lines are superimposed, some others not. Tricky bushiness!
+So some lines are superimposed, some others not. Tricky business! 
 
 
 ## Peak Picking Cent Wave
+
+Peak picking can also be performed with another algorithm: `CentWave`. The algorithm applied here is more clever and better suited for high resolution data. As we have seen in the lecture, it relies on the fact that the mass trace get stable in presence of a strong ionic signal
+
+Also here many parameters (and others are not mentioned). I highlight here some of them:  
+
+* **peakwidth:** this is the expected range of the width of the chromatographic peaks. In this case from 5 to 30 seconds 
+* **ppm:** this is the expected mass shift of the signal of a "true" ion due to electric noise
+* **prefilter:** this is an initial filter which will consider valid only ion traces which are preserving a signal of more than 100000 counts for at least 3 scans.
+* **noise:**
+
+
+```{r}
+cwp <- CentWaveParam(peakwidth = c(5, 30),    ## expected range of chromatographic peak width
+                     ppm = 5,                 ## tolerance to identify ROIs in the mz/rt plane
+                     prefilter = c(5, 50000),## number of consecutive scans showing a signal higher than 100000
+                     noise = 5000)            ## minimum signal to be considered
+cwp
+```
+
+If we run the peak picking with this new algorithm...
+
+```{r}
+raw_one_cw_picked <- findChromPeaks(raw_one, param = cwp)
+
+raw_one_cw_picked 
+```
+
+Ok here we see that the number of spotted peaks is different. If you think to it it is not strange: different method different results. 
+
+The first natural question you can ask is: where are you getting the parameters? Well, as I already told you at some point the "expert knowledge" enters the process. Reasonable guess for them is always coming from a good knowledge of the analytical pipeline. Optimal value could be optimized in a n automatic way (like IPO does), but reasonable guesses are fundamental to restrict the quest for the optimal solution in a multidimensional space. So either you understand the analytics, or you should go and speak with you "analytical" colleague.
+
+The second question. Are we getting comparable results?
+
+```{r}
+cw_peaks <- chromPeaks(raw_one_cw_picked) 
+dim(cw_peaks)
+head(cw_peaks, 5)
+```
+
+```{r}
+ggplotly(mf_peaks %>% 
+  as.data.frame() %>% 
+  ggplot() + 
+  geom_point(aes(x = rt, y = mz), col = "red", pch = 3, alpha = 0.5) + 
+  geom_point(cw_peaks %>% as_tibble(), mapping = aes(x = rt, y = mz), col = "blue", pch = 1, alpha = 0.5) +
+  theme_bw())
+```
+
+
+Different, isn't it? In some cases the two algorithms are coherent, in others the results are markedly different. Centwave it is also giving this strange horizontal line. 
+
+
+Let's give a look to the subregion 
+
+
+```{r}
+
+sub_peaks_cw <- cw_peaks %>% 
+  as.data.frame() %>% 
+  filter(mz > 284 & mz < 300) %>% 
+  filter(rt > 200 & rt < 300) 
+
+
+
+ggplotly(tibble(rt = rt, mz = mz, I = I)  %>% 
+  unnest(c("mz","I")) %>%
+  filter(mz > 284 & mz < 300) %>% 
+  filter(rt > 200 & rt < 300) %>% 
+  ggplot() + 
+  geom_point(aes(x = rt, y = mz, col = log10(I), size = I)) + 
+  geom_point(data = sub_peaks_cw, aes(x = rt, y = mz), col = "red", pch = 4, size = 3) + 
+  scale_color_viridis_c() + 
+  theme_light())
+
+```
+
+
+
+### Comments
+
+* For high resolution spectra as the one we have `centWave` is non to be more reliable results
+* In the first steps of your analysis you will tune-check-tune the parameters to find a reasonable 
+* Your experience will drive this optimization: do you see molecules that should be there (standards, known compounds) in the peaklist?
+
 
 
 
 ## Peak Picking all Dataset
 
+In real life situations, when you are happy with your peak picking parameters you run the process on all your samples. `xcms` is designed for that, the only thing you have to do is to load more than on e file.
 
-Read and include the phenodata
+In view of the step in which the peak list will be merged together it is important also to add to the object containing the raw data any type of meta information which is associated to the samples. Typical meta information includes:
 
-Load the peak picked object
+* the filename
+* the class of the sample (QC,blank,sample,standard) 
+* the study factors (treated, control, time, color, ...)
+* the inkectio order (to spot analytical drifts)
+
+in `xcms` all these infos are stored in an `AnnotatedDataFrame` object
+
+
+Typically all these info should be included in the filename, or in a csv which links the filename with the metadata. In the dataset we are using everything is in the file name, so let's process them. In the following we will assume that the data are stored as `mzML` inside the `data` subfolder.
+
+```{r}
+library(tools)  ## just to use file_path_sans_ext
+phenodata <- tibble(filepath = list.files("data/", pattern = ".mzML", full.names = TRUE)) %>% 
+  mutate(fname = file_path_sans_ext(basename(filepath))) %>% 
+  separate(fname, into = c("inj_ord","color","variety","bottle","rep","polarity","mode"), 
+           sep = "_", remove = FALSE) %>% 
+  as(.,"AnnotatedDataFrame")
+
+## to see the content 
+pData(phenodata)
+
+```
+
+Here we read the data in 
+
+
+```{r}
+raw_data <- raw_data <- readMSData(
+  files = phenodata$filepath, 
+  msLevel. = 1,
+  pdata = phenodata, ## this is the structure of xcms holding phenotypic data
+  mode = "onDisk")  ## with this parameter the data are not loaded into RAM
+```
+
+
+And perform the peak picking with centwave
+
+```{r}
+raw_data <- findChromPeaks(raw_data, param = cwp)
+```
+
+To make the process faster, I did the peak picking beforehand and I saved the outcomes as an RData file
+
+```{r}
+load("data/picked_peak.RData")
+```
+
+Let's give a look to the content of the full dataset
+
+```{r}
+raw_data
+```
+
+Here we are dealing with 29 files with different characteristics. After the peak picking optimization step we are confident that the parameters we have been choosing should give reasonably good results. Before going on, it is however useful to make some additional checks on the data quality.
+
+The first thing to do is to monitor the TIC of the 29 experiments to spot potential drops of the signal during the analysis
+
+
+```{r}
+tics <- chromatogram(raw_data, aggregationFun = "sum", 
+                     include = "none")     ## this argument is required to avoid 
+                                           ## including all the chromatograms of the picked peaks
+```
+
+
+We now plot them, with colors matching the sample class
+
+
+```{r}
+mypalette <- c("steelblue", "coral", "darkgreen")
+names(mypalette) <- c("red","X","wht")
+
+plot(tics, col = mypalette[raw_data$color])
+legend("topright", legend = c("red","Blank & QC","white"), col = mypalette, lty = 1)
+```
+
+The plot shows already nice things: 
+
+* QCs are nicely superimposed
+* The two colors are well separated
+
+The trend with the injection can be visualized as follows
+
+```{r}
+tc <- split(tic(raw_data), f = fromFile(raw_data))
+full_tics <- sapply(tc, sum)
+
+
+pData(raw_data) %>% 
+  tibble() %>% 
+  add_column(full_tics = full_tics) %>% 
+  ggplot() + 
+  geom_point(aes(x = inj_ord, y = full_tics, col = color), size = 2) + 
+  theme_bw() + 
+  theme(aspect.ratio = 0.3)
+
+```
+
+So no clear trend is visible in the data. X here represents QC and blanks.
+
+another type ov visualization that I find useful with reasonably small datasets is the following
+
+```{r fig.height=7, fig.width=14}
+chromPeaks(raw_data) %>% 
+  as_tibble() %>% 
+  ggplot() + 
+  geom_point(aes(x = rt, y = mz, col = log10(maxo)), size = 1, alpha = 0.5) + 
+  scale_color_viridis_c() + 
+  facet_wrap(~factor(sample)) + 
+  theme_bw() + 
+  theme(aspect.ratio = 0.5)
+```
+
+
+Here we see the peak maps of the different files. It is clear that each map is expected to be slightly different, but rally outlying samples will show up clearly. look to the blanks, for example, or to the horizontal lines which are present in many files
+
+
+## DIY
+
+Something for you now:
+
+* play around with the pick picking parameters and discuss what is the meaning of each one of them
+* Try to used what we have done so far to understand what happens in correspondence of the horizontal lines visible in many samples. To do that you should find the "troublesome" mz and extract its chromatogram across the full set of samples.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
