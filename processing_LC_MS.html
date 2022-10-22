@@ -375,7 +375,7 @@
 <section id="correlation-coefficients" class="slide level2">
 <h2>Correlation coefficients</h2>
 
-<img data-src="processing_LC_MS_files/figure-revealjs/unnamed-chunk-4-1.png" width="960" class="r-stretch quarto-figure-center"><p>Range of correlations: -0.88, 0.85</p>
+<img data-src="processing_LC_MS_files/figure-revealjs/unnamed-chunk-4-1.png" width="960" class="r-stretch quarto-figure-center"><p>Range of correlations: -0.86, 0.88</p>
 <p>We have relatively large values. Why?</p>
 </section>
 <section id="false-positives" class="slide level2" data-background-image="images/brain_bg.svg">
@@ -410,6 +410,32 @@
 <li>What are the variables measured in a <em>targeted metabolomics assay?</em></li>
 <li>What are the variables measured in an <em>untargeted LC-MS metabolomics experiment?</em></li>
 <li>What are the variables measured in an <em>untargeted NMR metabolomics experiment?</em></li>
+</ul>
+</section>
+<section id="data-hygiene" class="slide level2">
+<h2>Data hygiene</h2>
+<div>
+<ul>
+<li class="fragment">Go for a scripting language and forget Excel</li>
+<li class="fragment">… at least use a gui pipeline or a web based solution</li>
+<li class="fragment">Organize data and metadata</li>
+<li class="fragment">Avoid as much as possible <em>manual curation</em></li>
+<li class="fragment">Share your data, your scripts, your results</li>
+<li class="fragment">go open source</li>
+</ul>
+</div>
+</section>
+<section id="get-out-your-data" class="slide level2">
+<h2>Get out your data</h2>
+<ul>
+<li>Metabolomics data are always stored in “formats” which are specifically developed by instrument vendors</li>
+<li>In the case of MS data several open source standards are available (cdf, mzML, mzIML, …)</li>
+</ul>
+<p><a href="https://proteowizard.sourceforge.io/">Proteowizard</a></p>
+<ul>
+<li>command line tool</li>
+<li>gui application</li>
+<li>docker with proprietary libraries</li>
 </ul>
 </section>
 <section id="lc-ms-for-dummies" class="slide level2">
@@ -494,7 +520,7 @@
 <h2>Back to Raw data</h2>
 <p>Always check your results on the raw data</p>
 <ul>
-<li>Problems in preprocessing</li>
+<li>problems in preprocessing</li>
 <li>bad peaks</li>
 <li>biomarkers</li>
 <li>results hidden in noise</li>
@@ -556,19 +582,161 @@
 <p>BMC Bioinformatics 9, 504 (2008). https://doi.org/10.1186/1471-2105-9-504</p>
 </div>
 </section>
+<section id="peak-intensity-into-and-maxo" class="slide level2">
+<h2>Peak Intensity: <code>into</code> and <code>maxo</code></h2>
+
+<img data-src="images/maxointo.png" style="width:50.0%" class="r-stretch quarto-figure-center"></section>
 <section id="things-to-always-consider" class="slide level2" data-background-image="images/eye_bg.svg">
 <h2>Things to always consider</h2>
-<div>
+<div class="quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-center">
+<div class="quarto-layout-cell" style="flex-basis: 76.9%;justify-content: center;">
 <ul>
 <li class="fragment">Real peaks can be really badly shaped</li>
-<li class="fragment">You are better than an algorithm … well AI should do well</li>
+<li class="fragment">You are better than an algorithm … maybe AI will do well</li>
 <li class="fragment">Every algorithm has parameters to tune!</li>
 <li class="fragment">Look to the data!</li>
 <li class="fragment">Know how the instrument works</li>
+<li class="fragment">Check what happens to metabolites you know should be there</li>
 </ul>
+</div>
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 23.1%;justify-content: center;">
+<p>&nbsp;</p>
+</div>
+</div>
 </div>
 </section>
 <section id="section-1" class="slide level2">
+<h2></h2>
+<div class="quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<p>&nbsp;</p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="images/RStudio.png"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</section></section>
+<section>
+<section id="retention-time-correction-and-feature-definition" class="title-slide slide level1 center">
+<h1>Retention time correction and feature definition</h1>
+
+</section>
+<section id="just-a-recap" class="slide level2">
+<h2>… Just a recap</h2>
+<ol type="1">
+<li>We converted the data files in an open source format (here mzML)</li>
+<li>We optimized the peak picking parameters working on a representative sample (Qc)</li>
+<li>We have been running peal picking on the full set of samples</li>
+<li>We have been saving the output somewhere, just to avoid re-starting from scratch ;-)</li>
+</ol>
+</section>
+<section id="what-next" class="slide level2">
+<h2>What Next</h2>
+<p>We have to merge the lists of <span style="color: red">chromatographic peaks</span> into a consensus list of <span style="color: red"> features peaks</span>, which will be the column of our data matrix</p>
+<ul>
+<li><em>chromatographich peaks</em> what was detected in the individual samples (mz,rt,intensity)</li>
+<li><em>features</em> consensus variables which are <em>grouping</em> several peaks coming from the different injections (mz,rt, intensity)</li>
+</ul>
+</section>
+<section id="grouping" class="slide level2">
+<h2>Grouping</h2>
+
+<img data-src="images/grouping.svg" style="width:60.0%" class="r-stretch quarto-figure-center"></section>
+<section id="retention-time-correction" class="slide level2">
+<h2>Retention time correction</h2>
+<p>Since QC samples are the same, all variability seen there is analytical.</p>
+
+<img data-src="images/workflow.svg" style="width:60.0%" class="r-stretch quarto-figure-center"></section>
+<section id="dynamic-time-warping" class="slide level2">
+<h2>Dynamic time warping</h2>
+</section>
+<section id="section-2" class="slide level2">
+<h2></h2>
+</section>
+<section id="things-to-always-consider-1" class="slide level2" data-background-image="images/eye_bg.svg">
+<h2>Things to always consider</h2>
+<div class="quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-center">
+<div class="quarto-layout-cell" style="flex-basis: 76.9%;justify-content: center;">
+<ul>
+<li class="fragment">Aligning samples and not QCs can be tricky</li>
+<li class="fragment">Some metabolites could not be present in pooled QC (dilutions)</li>
+<li class="fragment">Sometimes chromatographic peaks are missed</li>
+<li class="fragment">Always check the data and the known peaks!</li>
+<li class="fragment">Parameters are easier to tune if you know how the analytics works</li>
+</ul>
+</div>
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 23.1%;justify-content: center;">
+<p>&nbsp;</p>
+</div>
+</div>
+</div>
+</section>
+<section id="nasss-nasss" class="slide level2">
+<h2>NAsss NAsss</h2>
+<p>Even if you do everything well your final data matrix will be full of missing values:</p>
+<ul>
+<li></li>
+</ul>
+</section>
+<section id="section-3" class="slide level2">
+<h2></h2>
+<div class="quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<p>&nbsp;</p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="images/RStudio.png"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</section></section>
+<section>
+<section id="bonus-section-fragmentation-data" class="title-slide slide level1 center">
+<h1>Bonus Section: fragmentation data</h1>
+
+</section>
+<section id="annotation-and-ms" class="slide level2" data-background-image="images/brain_bg.svg">
+<h2>Annotation and MS</h2>
+<div class="quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-center">
+<div class="quarto-layout-cell" style="flex-basis: 76.9%;justify-content: center;">
+<ul>
+<li class="fragment">At the end of the journey we would like to work on <em>metabolites</em> or <em>pathways</em> and not on features</li>
+<li class="fragment">We know that <strong>annotation</strong> is the most challenging step of all the business</li>
+<li class="fragment">The more we know about the structure of our ions the better it is</li>
+<li class="fragment">Database of standards, web resources, chemoinformatics, …</li>
+<li class="fragment"><strong>Fragmentation patterns are extremely useful</strong></li>
+</ul>
+</div>
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 23.1%;justify-content: center;">
+<p>&nbsp;</p>
+</div>
+</div>
+</div>
+</section>
+<section id="msms-and-dda" class="slide level2">
+<h2>MS/MS and DDA</h2>
+<p><em>DDA</em>: data dependent acquisition</p>
+
+<img data-src="images/tandemMS.jpg" style="width:60.0%" class="r-stretch quarto-figure-center"></section>
+<section id="section-4" class="slide level2">
 <h2></h2>
 <div class="quarto-layout-panel">
 <div class="quarto-layout-row quarto-layout-valign-top">
