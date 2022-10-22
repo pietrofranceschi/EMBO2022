@@ -148,8 +148,8 @@ plot(mz(focus_MS_MS[[1]]),
      type = "h",
      xlab = "mz",
      ylab = "normalized Intensity")
-points(mz(focus_MS_MS[[2]]), intensity(focus_MS_MS[[2]])/max(intensity(focus_MS_MS[[2]])), col = "red")
-points(mz(focus_MS_MS[[4]]), intensity(focus_MS_MS[[4]])/max(intensity(focus_MS_MS[[4]])), col = "blue")
+points(mz(focus_MS_MS[[2]])+2, intensity(focus_MS_MS[[2]])/max(intensity(focus_MS_MS[[2]])), col = "red", type = "h")
+points(mz(focus_MS_MS[[4]])-2, intensity(focus_MS_MS[[4]])/max(intensity(focus_MS_MS[[4]])), col = "blue", type = "h")
 ```
 
 So, as expected the three procyanidins are giving substantially the same fragmentation spectrum and are eluted at three different retention times.
