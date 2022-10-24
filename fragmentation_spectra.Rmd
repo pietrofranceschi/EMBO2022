@@ -23,7 +23,7 @@ Annotation is the process of going back from features to compounds and it can be
 
 Annotation in MS is particularly challenging due to the fact that a mass spectrometer is basically a tool able to measure only mass to charge ratios ... I mean can you imagine how difficult would be to distinguish people on the bases only of their weight?
 
-Fragmentation experiments, often called MS/MS, are an essential tool for this task. They can be used either to deduce information on the chemical characteristics of unknown compounds, or to confirm the annotation when autentic chemical standards are available.
+Fragmentation experiments, often called MS/MS, are an essential tool for this task. They can be used either to deduce information on the chemical characteristics of unknown compounds, or to confirm the annotation when authentic chemical standards are available.
 
 In this second case, the typical workflow is to inject the standards with the very same analytical pipeline used for the samples, and then use m/z, rt and MS/MS to confirm the presence of a given compound inside my samples.
 
@@ -57,7 +57,7 @@ std_files <- list.files("data/", pattern = "mix", full.names = TRUE)
 
 
 std_raw <- readMSData(std_files, 
-                    msLevel. = 1, ## we read only MS1 and MS2
+                    msLevel. = 1, ## we read only MS1 
                     mode = "onDisk")
 ```
 
@@ -137,9 +137,7 @@ rtime(focus_MS_MS)
 The first two are OK (File1 and File2), for the third file we have two fragmentations. This is not unreasonable since the blue peak is large, the ion at m/z 577 was, most likely fragmented in two consecutive scans. To understand which  is the good one one should rely on DBs or interpretation of mass spectra
 
 
-Let's now make anicer plot with the spectra
-
-
+Let's now make a nice plot with the spectra
 
 
 ```{r}
@@ -160,40 +158,6 @@ Try to check if these compounds are visible inside one of our wine samples. Hint
 
 
 
-## Solution
-
-```{r}
-wine <- readMSData("data/x004_red_sangio_B_1_NEG_DDA.mzML", 
-                   mode = "onDisk")
-```
-
-
-```{r}
-wine %>% 
-  filterMsLevel(1) %>% 
-  filterRt(c(200,300)) %>% 
-  chromatogram(mz = 577.13 + c(-1,1)*0.01) %>% 
-  plot()
-```
-
-
-```{r}
-MSMS <- wine %>% 
-  filterMsLevel(2) %>% 
-  filterRt(c(200,300)) %>% 
-  filterPrecursorMz(577.13, ppm = 10) 
-```
-
-```{r}
-plot(mz(MSMS[[1]]), 
-     intensity(MSMS[[1]])/max(intensity(MSMS[[1]])), 
-     type = "h",
-     xlab = "mz",
-     ylab = "normalized Intensity")
-```
-
-
-Yeah!
 
 
 

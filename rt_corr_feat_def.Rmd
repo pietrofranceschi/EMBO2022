@@ -17,7 +17,7 @@ library(plotly)
 
 ## Introduction
 
-In the previous demo we have been dealing with peak picking, so we assume that we have now a full list of chromatographic peaks which have been detected across the full set of samples.
+In the previous demo we have been dealing with peak picking, so we assume that we have now a list of chromatographic peaks which have been detected across the full set of samples.
 
 The next step in the process is now to "match" these list of peaks in a consensus list of **features** which will be the variables which will be present in the final data matrix. 
 
@@ -26,7 +26,8 @@ This process of matching is necessary to compensate:
 * measurement error in the m/z dimension
 * retention time shifts
 
-In general, the first phenomenon is less important than the second: when you buy a very expensive mass spectrometer, the instrument producer will do its best to keep *mass accuracy* as high as possible. Chromatographic stability, on the other, end is by far less easy to control.
+In general, the first phenomenon is less important than the second: when you buy a very expensive mass spectrometer, the instrument producer will do its best to keep *mass accuracy* as high as possible. On that dimension you, basically, do binning.
+Chromatographic stability, on the other, end is by far less easy to control.
 
 We start reading in the pick picked data
 
@@ -61,7 +62,6 @@ chr_raw <- chromatogram(raw_data,
 
 Find the CP in the slice
 
-
 ```{r}
 sub_peaks <- chromPeaks(raw_data) %>% 
   as_tibble() %>% 
@@ -80,19 +80,19 @@ legend("topright", legend = c("red","white", "X"), col = group_colors, lty = 1)
 abline(v = sub_peaks$rt, col = "red", lty = 3)
 ```
 
-Here we have a tricky situation. The peaks are not aligned, but this is actually a double feature, which is a potential biomarker for color and variety ... so we should go back to peak detection and play around ;-)
+Here we have a tricky situation. The peaks are not aligned, but this is actually a double feature, which is also potential biomarker for color and variety ... so we should go back to peak detection and play around ;-)
 
 Anyway, let's try to correct the rt shift. As usual in xcms this can be done in different way, here we will use the most simple solution (a potentially more flexible one based on *dynamic time warping* is also available) 
 
-What we will do is to apply this algorithm on the QCs and the extrapolate the estimated Rt correction on the samples. The rationale behind this choice is the following. Samples could be chemically different so it could be in principle possible to misinterpret a chemical difference (which produces a difference in rt) with a retention time shift of analytical origin.
+What we will do is to apply this algorithm on the QCs and the extrapolate the estimated Rt correction on the samples. The rationale behind this choice is the following: samples could be chemically different so it could be in principle possible to misinterpret a chemical difference (which produces a difference in rt) with a retention time shift of analytical origin.
 
-If I use QCs to do that the chemical nature of the samples is the same so every difference is coming from analytical drifts!.
+If I use QCs to do that the chemical nature of the samples is the same so every difference is coming from analytical drifts!
 
 The idea behind retention time is quite simple:
 
 * match groups of chromatographic peaks present in all samples (called house keeping peak groups)
 * estimate a consensus retention time
-* extrapolate the retention time on regions of the rt axes where the peaks are not present (either with a linear or aloess function)
+* extrapolate/interpolate the retention time on regions of the rt axes where the peaks are not present (either with a linear or a loess function)
 
 The first thing to do is to identify the house keeping groups:
 
@@ -162,7 +162,7 @@ The df is quite rich:
 * the subsequent columns are gicing you the same info split by sample group
 * peakidx contains the index of peaks which were assigned to this feature 
 
-Let's dig more on this. For example, can we visualize the position of the peaks assigned to FT005. The idx are the indexes of the row in the peak tabls
+Let's dig more on this. For example, can we visualize the position of the peaks assigned to FT005. The idx are the indexes of the row in the peak table
 
 
 ```{r}
@@ -201,7 +201,7 @@ Recalling what we discussed in the lecture, NAs can be there for two main reason
 * a compound is below the detection limit in one or more samples. No compounds, no features, no party ...
 * our peak picking could have been mistaken somewhere
 
-NAs will be discussed in more details by Maria in the afternoon, here we can anticipate that the two previous processess will result in different type of missingness (either random or non random) ...
+NAs will be discussed in more details by Maria in the afternoon, here we can anticipate that the two previous processes will result in different type of missingness (either random or non random) ...
 
 Anyway, `xcms` implement a clever strategy to try to fix, at least partially, the NAs. The function `fillChromPeaks` will take care of going back to the raw files and integrate the signal possibly present in the mz/rt region of each feature. If the peak was there and was missed by chance this will basically recover the lost signal
 
@@ -246,11 +246,10 @@ plot(ft_chr1, col = group_colors[raw_data$color],
 That can be used to spot problems of integration, and, also, if a biomarker is really a biomarker ;-)
 
 
-
 ## DIY
 
 * If you go back to the feature tables, you will see that in some cases the number of peaks assigned to a features can be larger than the number of samples. How can this be? Try to check the diagnostic plots and understand what happens
-* At the beginning of this demo we have been focussing our attention to the extracted ion trace around mz 289. Try to check how many features were defined there. Can you check i fthe oeak was integrated well?
+* At the beginning of this demo we have been focussing our attention to the extracted ion trace around mz 289. Try to check how many features were defined there. Can you check if there the peak was integrated well?
 
 
 

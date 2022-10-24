@@ -154,9 +154,9 @@ We have relatively large values. Why?
 * **Statistical Validation**: get brand new samples and see if what we get is still there
 * **Domain Validation**: is what I'm getting in keeping with the domain specific body of knowledge? Could I design an experiment to check my hypothesis?
 
-...
+. . .
 
-Do we always need statistics?
+#### Do we always need statistics?
 
 
 ## By the way ...
@@ -310,6 +310,8 @@ Always check your results on the raw data
 
 ::: {layout="[[-1], [1], [-1]]"}
 ![](images/RStudio.png){fig-align="center"}
+:::
+
 
 # Peak Picking
 
@@ -429,8 +431,16 @@ Mind the power of warping ...
 
 Even if you do everything well your final data matrix will be full of missing values:
 
-* 
+* errors in peak picking
+* "absence" of a metabolite in one or more samples (biology)
+* that metabolite is below the detection limit (analytics)
 
+<hr>
+
+. . .
+
+* missing at random
+* missing not at random
 
 
 
