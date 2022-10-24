@@ -29,17 +29,14 @@ So every metabolite ...
 * every metabolites produces peaks in more than one ionic trace
 * in many cases the same ion could be produced in the ionization of different metabolites
 
-
 So ...
 
 * to find metabolites we have to automatically look for peaks in the mz/rt plane
-* we will have much more peaks than metabolites. And this will make the analysis of our data matrix extremely challenging
-
-
+* we will have much more peaks than metabolites... and this will make the analysis of our data matrix extremely challenging
 
 ## Peak Picking
 
-The process of finding peaks in the data is called *peak picking*. It can be done in many different ways, and actually every software will do it slightly differently. The first step in the analysis of our dataset will be to pick the peaks in the full set of samples. Here I'll show you the process on one file,
+The process of finding chromatographic peaks in the data is called *peak picking*. It can be done in many different ways, and actually every software will do it slightly differently. The first step in the analysis of our dataset will be to pick the peaks in the full set of samples. Here I'll show you the process on one file.
 
 There are some important point to remember.
 
@@ -48,13 +45,14 @@ There are some important point to remember.
 * every algorithm will have parameters to tune
 * expert knowledge will be useful at some point 
 
+Working on a representative file will help you in fine tuning and benchmarking your parameters
 
 Let's start reeding in a raw file 
 
 ```{r}
 raw_one <- readMSData(
   files = "data/x016_X_QC_X_4_NEG_DDA.mzML",
-  msLevel. = c(1,2), ## we read only MS1 and MS2
+  msLevel. = 1, ## we read only MS1
   mode = "onDisk")  ## with this parameter the data are not loaded into RAM
 ```
 
@@ -82,7 +80,7 @@ mf
 Now I can use the previous parameters to find the peaks in **one** sample:
 
 ```{r}
-
+## this function is used to find the chromatographic peaks with the previous parameters
 raw_one_mf_picked <- findChromPeaks(raw_one, param = mf)
 
 raw_one_mf_picked 
@@ -98,28 +96,28 @@ head(mf_peaks, 5)
 ```
 
 
-Let's walk to the most relevent columns:
+Let's walk to the most relevant columns:
 
 - rownames gives the id of each chromatographic peak. **CPxxx** stands for Chromatographic Peak xxx
-- mz columns identify the mz slice (remember that mz is measured over time so it's slightly changing)
-- rt columns identify the boundaries and the apex of each chromatographic peak
+- mz* columns identify the mz slice (remember that mz is measured over time so it's slightly changing from scan to scan)
+- rt* columns identify the boundaries and the apex of each chromatographic peak
 - into,intf,maxo and maxf are measures of intensity of the peak. What is normally used are maxo and into which are the signal at the apex of the peak and the integral of the signal across the peak area, respectively.
-- sample: in the standar workflow peak picking is performed on all samples, so this column is telling us where each peak was found
+- sample: this column is telling us where each peak was found
 
-
-Let's now give a look to the position of the peaks in the mz/rt plane
+Let's now give a look to the position of the peaks in the mz/rt plane. The size of the point will be proportional to the intensity
 
 ```{r}
 mf_peaks %>% 
   as.data.frame() %>% 
+  mutate(into = sqrt(into)) %>% 
   ggplot() + 
-  geom_point(aes(x = rt, y = mz, size = sn, col = sn), alpha = 0.7) + 
+  geom_point(aes(x = rt, y = mz, alpha = into, col = into)) + 
   scale_color_viridis_c() + 
   theme_bw()
   
 ```
 
-If you go back to the previous demo, we were focussing on a specific area of the raw signal whiich was particularly promising
+If you go back to the previous demo, we were focussing on a specific area of the raw signal which was particularly promising
 
 ```{r}
 rt <- rtime(raw_one)
@@ -185,13 +183,13 @@ Also here many parameters (and others are not mentioned). I highlight here some 
 * **peakwidth:** this is the expected range of the width of the chromatographic peaks. In this case from 5 to 30 seconds 
 * **ppm:** this is the expected mass shift of the signal of a "true" ion due to electric noise
 * **prefilter:** this is an initial filter which will consider valid only ion traces which are preserving a signal of more than 100000 counts for at least 3 scans.
-* **noise:**
+* **noise:** this is the minimum signal which will be considered
 
 
 ```{r}
 cwp <- CentWaveParam(peakwidth = c(5, 30),    ## expected range of chromatographic peak width
                      ppm = 5,                 ## tolerance to identify ROIs in the mz/rt plane
-                     prefilter = c(5, 50000),## number of consecutive scans showing a signal higher than 100000
+                     prefilter = c(5, 50000),## number of consecutive scans showing a signal higher than 50000
                      noise = 5000)            ## minimum signal to be considered
 cwp
 ```
@@ -206,7 +204,7 @@ raw_one_cw_picked
 
 Ok here we see that the number of spotted peaks is different. If you think to it it is not strange: different method different results. 
 
-The first natural question you can ask is: where are you getting the parameters? Well, as I already told you at some point the "expert knowledge" enters the process. Reasonable guess for them is always coming from a good knowledge of the analytical pipeline. Optimal value could be optimized in a n automatic way (like IPO does), but reasonable guesses are fundamental to restrict the quest for the optimal solution in a multidimensional space. So either you understand the analytics, or you should go and speak with you "analytical" colleague.
+The first natural question you can ask is: where are you getting the parameters? Well, as I already told you at some point the "expert knowledge" enters the process. Reasonable guess for them is always coming from a good knowledge of the analytical pipeline. Optimal value could be optimized in an automatic way (like IPO does), but reasonable guesses are fundamental to restrict the quest for the optimal solution in a multidimensional space. So either you understand the analytics, or you should go and speak with you "analytical" colleague.
 
 The second question. Are we getting comparable results?
 
@@ -226,10 +224,10 @@ ggplotly(mf_peaks %>%
 ```
 
 
-Different, isn't it? In some cases the two algorithms are coherent, in others the results are markedly different. Centwave it is also giving this strange horizontal line. 
+Different, isn't it? In some cases the two algorithms are coherent, in others the results are markedly different. Centwave it is also giving this strange horizontal line at large rt
 
 
-Let's give a look to the subregion 
+Let's give a look to our subregion 
 
 
 ```{r}
@@ -253,8 +251,6 @@ ggplotly(tibble(rt = rt, mz = mz, I = I)  %>%
 
 ```
 
-
-
 ### Comments
 
 * For high resolution spectra as the one we have `centWave` is non to be more reliable results
@@ -273,10 +269,9 @@ In view of the step in which the peak list will be merged together it is importa
 * the filename
 * the class of the sample (QC,blank,sample,standard) 
 * the study factors (treated, control, time, color, ...)
-* the inkectio order (to spot analytical drifts)
+* the injectio order (to spot analytical drifts)
 
 in `xcms` all these infos are stored in an `AnnotatedDataFrame` object
-
 
 Typically all these info should be included in the filename, or in a csv which links the filename with the metadata. In the dataset we are using everything is in the file name, so let's process them. In the following we will assume that the data are stored as `mzML` inside the `data` subfolder.
 
@@ -294,7 +289,6 @@ pData(phenodata)
 ```
 
 Here we read the data in 
-
 
 ```{r}
 raw_data <- raw_data <- readMSData(
@@ -370,7 +364,7 @@ pData(raw_data) %>%
 
 So no clear trend is visible in the data. X here represents QC and blanks.
 
-another type ov visualization that I find useful with reasonably small datasets is the following
+Another type ov visualization that I find useful with reasonably small datasets is the following
 
 ```{r fig.height=7, fig.width=14}
 chromPeaks(raw_data) %>% 
@@ -384,15 +378,16 @@ chromPeaks(raw_data) %>%
 ```
 
 
-Here we see the peak maps of the different files. It is clear that each map is expected to be slightly different, but rally outlying samples will show up clearly. look to the blanks, for example, or to the horizontal lines which are present in many files
+Here we see the peak maps of the different files. It is clear that each map is expected to be slightly different, but rally outlying samples will show up clearly. Look to the blanks, for example, or to the horizontal lines which are present in many files
 
 
 ## DIY
 
 Something for you now:
 
-* play around with the pick picking parameters and discuss what is the meaning of each one of them
+* Play around with the pick picking parameters and discuss what is the meaning of each one of them.
 * Try to used what we have done so far to understand what happens in correspondence of the horizontal lines visible in many samples. To do that you should find the "troublesome" mz and extract its chromatogram across the full set of samples.
+* Can you try to check the mz and rt of the same peak across the 29 samples (use the `filterFile` function to get rid of the blanks!)? Are they the same?
 
 
 

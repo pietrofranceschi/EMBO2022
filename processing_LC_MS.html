@@ -327,6 +327,30 @@
 
 <section id="what-is-xcms" class="slide level2">
 <h2>What is <code>xcms</code></h2>
+<p>Framework for processing and visualization of chromatographically separated and single-spectra mass spectral data.</p>
+<p><a href="http://www.bioconductor.org/packages/release/bioc/html/xcms.html">xcms</a></p>
+<div class="fragment">
+<p>and still growing …</p>
+<p><a href="https://www.rformassspectrometry.org/">RforMassSpectrometry</a></p>
+<div class="quarto-layout-panel">
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="images/compoundDB.png"></p>
+</figure>
+</div>
+</div>
+<div class="quarto-layout-cell" style="flex-basis: 50.0%;justify-content: center;">
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="images/spectra.png"></p>
+</figure>
+</div>
+</div>
+</div>
+</div>
+</div>
 </section>
 <section id="outline" class="slide level2 smaller" data-background-image="images/numbers.jpg">
 <h2>Outline</h2>
@@ -375,7 +399,7 @@
 <section id="correlation-coefficients" class="slide level2">
 <h2>Correlation coefficients</h2>
 
-<img data-src="processing_LC_MS_files/figure-revealjs/unnamed-chunk-4-1.png" width="960" class="r-stretch quarto-figure-center"><p>Range of correlations: -0.86, 0.88</p>
+<img data-src="processing_LC_MS_files/figure-revealjs/unnamed-chunk-4-1.png" width="960" class="r-stretch quarto-figure-center"><p>Range of correlations: -0.87, 0.9</p>
 <p>We have relatively large values. Why?</p>
 </section>
 <section id="false-positives" class="slide level2" data-background-image="images/brain_bg.svg">
@@ -421,7 +445,7 @@
 <li class="fragment">Organize data and metadata</li>
 <li class="fragment">Avoid as much as possible <em>manual curation</em></li>
 <li class="fragment">Share your data, your scripts, your results</li>
-<li class="fragment">go open source</li>
+<li class="fragment">Go open source</li>
 </ul>
 </div>
 </section>
@@ -442,6 +466,23 @@
 <h2>LC-MS For Dummies</h2>
 
 <img data-src="images/LCMS.jpg" class="r-stretch quarto-figure-center"></section>
+<section id="analytical-variability-in-lc-ms-mass" class="slide level2">
+<h2>Analytical Variability in LC-MS: mass</h2>
+
+<img data-src="images/mass_drift.png" class="r-stretch quarto-figure-center"></section>
+<section id="analytical-variability-in-lc-ms-retention-time" class="slide level2">
+<h2>Analytical Variability in LC-MS: retention time</h2>
+<div class="cell">
+
+</div>
+<div class="cell">
+
+</div>
+
+<img data-src="processing_LC_MS_files/figure-revealjs/unnamed-chunk-7-1.png" width="960" class="r-stretch quarto-figure-center"></section>
+<section id="analytical-variability-in-lc-ms-intensity" class="slide level2">
+<h2>Analytical Variability in LC-MS: intensity</h2>
+</section>
 <section id="preprocessing" class="slide level2">
 <h2>Preprocessing</h2>
 <div>
@@ -481,23 +522,6 @@
 </div>
 </div>
 </div>
-</section>
-<section id="analytical-variability-in-lc-ms-mass" class="slide level2">
-<h2>Analytical Variability in LC-MS: mass</h2>
-
-<img data-src="images/mass_drift.png" class="r-stretch quarto-figure-center"></section>
-<section id="analytical-variability-in-lc-ms-retention-time" class="slide level2">
-<h2>Analytical Variability in LC-MS: retention time</h2>
-<div class="cell">
-
-</div>
-<div class="cell">
-
-</div>
-
-<img data-src="processing_LC_MS_files/figure-revealjs/unnamed-chunk-7-1.png" width="960" class="r-stretch quarto-figure-center"></section>
-<section id="analytical-variability-in-lc-ms-intensity" class="slide level2">
-<h2>Analytical Variability in LC-MS: intensity</h2>
 </section>
 <section id="lc-ms-produces-3d-data-rtmzi" class="slide level2">
 <h2>LC-MS produces 3D data (rt,mz,I)</h2>
@@ -653,14 +677,19 @@
 <img data-src="images/grouping.svg" style="width:60.0%" class="r-stretch quarto-figure-center"></section>
 <section id="retention-time-correction" class="slide level2">
 <h2>Retention time correction</h2>
-<p>Since QC samples are the same, all variability seen there is analytical.</p>
 
-<img data-src="images/workflow.svg" style="width:60.0%" class="r-stretch quarto-figure-center"></section>
+<img data-src="images/workflow.svg" style="width:100.0%" class="r-stretch quarto-figure-center"></section>
 <section id="dynamic-time-warping" class="slide level2">
-<h2>Dynamic time warping</h2>
-</section>
-<section id="section-2" class="slide level2">
-<h2></h2>
+<h2>Dynamic Time Warping</h2>
+<p>Available in <code>xcms</code> trough <code>obiwarp</code></p>
+<div>
+<p>Mind the power of warping …</p>
+<div class="quarto-figure quarto-figure-center">
+<figure>
+<p><img data-src="images/warping.png" style="width:100.0%"></p>
+</figure>
+</div>
+</div>
 </section>
 <section id="things-to-always-consider-1" class="slide level2" data-background-image="images/eye_bg.svg">
 <h2>Things to always consider</h2>
@@ -688,7 +717,7 @@
 <li></li>
 </ul>
 </section>
-<section id="section-3" class="slide level2">
+<section id="section-2" class="slide level2">
 <h2></h2>
 <div class="quarto-layout-panel">
 <div class="quarto-layout-row quarto-layout-valign-top">
@@ -736,7 +765,7 @@
 <p><em>DDA</em>: data dependent acquisition</p>
 
 <img data-src="images/tandemMS.jpg" style="width:60.0%" class="r-stretch quarto-figure-center"></section>
-<section id="section-4" class="slide level2">
+<section id="section-3" class="slide level2">
 <h2></h2>
 <div class="quarto-layout-panel">
 <div class="quarto-layout-row quarto-layout-valign-top">

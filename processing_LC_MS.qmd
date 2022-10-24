@@ -11,6 +11,25 @@ format:
 
 ## What is `xcms`
 
+Framework for processing and visualization of chromatographically separated and single-spectra mass spectral data. 
+
+[xcms](http://www.bioconductor.org/packages/release/bioc/html/xcms.html)
+
+and still growing ...
+
+[RforMassSpectrometry](https://www.rformassspectrometry.org/)
+
+::: {layout-ncol=2}
+
+![](images/compoundDB.png){fig-align="center" width=30%}
+
+![](images/spectra.png){fig-align="center" width=30%}
+
+
+:::
+
+
+
 
 
 ## Outline {.smaller background-image="images/numbers.jpg"}
@@ -151,7 +170,7 @@ We have relatively large values. Why?
 * Organize data and metadata
 * Avoid as much as possible *manual curation*
 * Share your data, your scripts, your results
-* go open source
+* Go open source
 :::
 
 
@@ -370,14 +389,18 @@ We have to merge the lists of <span style="color: red">chromatographic peaks</sp
 
 ## Retention time correction
 
-Since QC samples are the same, all variability seen there is analytical. 
+![](images/workflow.svg){width=100% fig-align="center"}
 
-![](images/workflow.svg){width=60% fig-align="center"}
+## Dynamic Time Warping
 
-## Dynamic time warping
+Available in `xcms` trough `obiwarp`
 
+. . .
 
-## 
+Mind the power of warping ...
+
+![](images/warping.png){width=100% fig-align="center"}
+:::
 
 
 ## Things to always consider {background-image="images/eye_bg.svg"}

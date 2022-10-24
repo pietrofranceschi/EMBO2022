@@ -18,7 +18,7 @@ library(plotly)
 
 ## Introduction
 
-The objective of this demo is to make you familiar with the characteristics of LC-MS metabolomics data (both MS1 and MS2) by using two packages belonging to the `xcms` ecosystem. 
+The objective of this demo is to make you familiar with the characteristics of LC-MS metabolomics data (here Ms1) by using `xcms` ecosystem. 
 
 Since its first release in 2006, `xcms` has been steadily growing as one of the standards for the analysis of LC(GC)-MS-(MS) metabolomics data.
 
@@ -40,12 +40,12 @@ For our demo we will use a subset of a dataset on wines which have been recently
 * 12 varieties
 
 
-The acquisition sequences included blanks, pooled QC and samples. Al data were acquired with a UPLC-LTQ-Orbitrap instrument. A set of standard injections is also available to illustrate the annotation strategy.
+The acquisition sequences also included blanks and pooled QC. Al data were acquired with a UPLC-LTQ-Orbitrap instrument. A set of standard injections is also available to illustrate the annotation strategy.
 
 
 ## Reading one injection
 
-To understand how the data behaves, let's start reading in the data coming from one injection
+To understand how the data look like, let's start reading in the data coming from one QC injection
 
 ```{r}
 raw_one <- readMSData(
@@ -61,16 +61,14 @@ Let's look to the object
 raw_one
 ```
 
-We see ...
+among the other infos we see:
 
 * the file name!
 * something called `phenoData`. More on that later!
-* something called `featureDatra`. More on that later!
 * the length of the LC method was 12 minutes
-* during this time 1638 spectra were collected
+* during this time 1092 spectra were collected
 
-
-It is important that along the process one can be able to visualize the raw data, so let's give a look to the structure of the R object we created.
+It is important that along the process of data analysis one can be able to visualize the raw data, so let's give a look to the structure of the R object we created.
 
 Let's first get the retention times where spectra were collected
 
@@ -94,7 +92,8 @@ As you see, they are interleaved.
 Let's now get out the full scans 
 
 ```{r}
-fs_raw <- raw_one %>% filterMsLevel(1)
+fs_raw <- raw_one %>% 
+  filterMsLevel(1)
 ```
 
 
@@ -121,11 +120,12 @@ So both object are lists: for every scan we have a vector of `mz` and a vector o
 
 ### Plot by hand
 
+As we have seen in in the lecture, it is mportant to be able to plot the raw data
+
+
 ```{r}
 plot(mz[[1]], I[[1]], type = "h")
 ```
-
-### Plot with `xcms`
 
 The first spectrum can be extracted by standard list subsetting
 
@@ -134,7 +134,7 @@ s1 <- fs_raw[[1]]
 s1
 ```
 
-So a method for this type of object is alredy in place
+This is an object of class "Specrum1" So a method for this type of object is already available
 
 ```{r}
 plot(s1)
@@ -145,6 +145,12 @@ This can be also made interactive with a little (and inelegant) trick
 ```{r}
 ggplotly(plot(s1))
 ```
+
+What can I learn from a spectrum:
+
+* the overall quolity of my data
+* the presence of multicharged species
+* the overall level of "noise" of my machine
 
 This is an alternative 2D visualization of the ion map
 
@@ -163,14 +169,15 @@ ggplotly(tibble(rt = rt, mz = mz, I = I)  %>%
 
 As we have discussed in the presentation, the different metabolites present in the sample will show-up as peaks in their ion chromatograms, basically because when more molecule of a specific type are reaching the ionization source, more ions associated to that molecule are produced.
 
-The previous map shows that the ion around m/z 295.0445 could show an interesting profile over time ...
+The previous map shows that the ion around m/z 295.0445 could show an interesting profile over time ... let's get out its extracted ion chromatogram ...
 
 ```{r}
 # extract the chromatogram
 chr_raw <- chromatogram(fs_raw, 
-                        mz = 295.0445 + 0.01*c(-1, 1), 
-                        rt = 250 + 60*c(-1, 1))
+                        mz = 295.0445 + 0.01*c(-1, 1),   ## the m/z range
+                        rt = 250 + 60*c(-1, 1)) ## the rt range
 
+## plot the object
 chr_raw
 ```
 
@@ -180,9 +187,13 @@ As before we can get out the data and manually plot the trace
 plot(rtime(chr_raw[1,1]), intensity(chr_raw[1,1]), type = "b")
 ```
 
-Note: the structure of the `Mchromatograms` is "matrix like" because it is designed to work best with many ions and many files.
+Note: the structure of the `Mchromatograms` is "matrix like" because it is designed to work best with many ions and many files. What is this telling us ...
 
-Just to show what I mean let's read in the data coming from two different injections
+* the typical width of our chromatographic trace
+* the number of spectra we acquired over the peak. This is an important information, because the higher the number of points, the better is my estimation of the peak profile.
+
+
+Back to the chromatogram object, let's read in the data coming from two different injections
 
 ```{r}
 two_raw <- readMSData(
@@ -203,9 +214,7 @@ chr_raw_2 <- chromatogram(two_raw,
 chr_raw_2
 ```
 
-Here we could extract the rt and intensity for the separate files, but we can plot them with a handy `xcms` method
-
-The plot can be also obtained by a specific method, which is also giving some additional info
+Here we could extract the rt and intensity for the separate files, but we can plot them with a handy `xcms` method, which is also giving some additional info:
 
 ```{r}
 plot(chr_raw_2)
@@ -213,16 +222,14 @@ plot(chr_raw_2)
 
 Here we see a clear difference between the two traces, looking to the names we see that one datafile is a QC, while the second is one injection of a white wine (`wht`)... food for brains !  ;-)
 
-
 **Note** The previous plot shows a typical characteristics of Orbitrap (and in general FT) instruments: the signal off peaks is almost invariably zero. As we will see this can be a problem in presence of missing data, since no "real" noise can be integrated there.
 
 
 ## DIY
 
-* Play around with the previous 2d map and look for potentially interesting ions. Plot their chromatogram
-* Look how the quality of the mass spectrum is changing across one chromatographic peak
+* Play around with the previous 2d map and look for potentially interesting ions. Plot their EIC
 * If you look to the map, can you say why the signal with high intensity are organized in vertical groups?
-* The trace around 289 seems to show two horizontal peaks. What does it mean? Can you interpret that?
+* The horizontal trace around 289 seems to show two peaks. What does it mean? Can you plot its EIC)? Can you compare the spectra measured at the top of the two peaks?
 
 
 
