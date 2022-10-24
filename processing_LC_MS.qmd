@@ -1,5 +1,5 @@
 ---
-title: "Processing LC-MS Metabolomics Data with `xcms`"
+title: "Processing LC-MS Metabolomics Data with xcms"
 author: "Pietro Franceschi"
 format: 
   revealjs: 
@@ -154,6 +154,10 @@ We have relatively large values. Why?
 * **Statistical Validation**: get brand new samples and see if what we get is still there
 * **Domain Validation**: is what I'm getting in keeping with the domain specific body of knowledge? Could I design an experiment to check my hypothesis?
 
+...
+
+Do we always need statistics?
+
 
 ## By the way ...
 
@@ -224,6 +228,7 @@ plot(bpi, col = "steelblue", main = "BPI")
 
 ## Analytical Variability in LC-MS: intensity
 
+![](images/Total_ion_current.png){width=100% fig-align="center"}
 
 ## Preprocessing
 
@@ -305,7 +310,6 @@ Always check your results on the raw data
 
 ::: {layout="[[-1], [1], [-1]]"}
 ![](images/RStudio.png){fig-align="center"}
-:::
 
 # Peak Picking
 
@@ -400,7 +404,13 @@ Available in `xcms` trough `obiwarp`
 Mind the power of warping ...
 
 ![](images/warping.png){width=100% fig-align="center"}
-:::
+
+##
+
+![](images/rt_shift.png){width=100% fig-align="center"}
+
+
+
 
 
 ## Things to always consider {background-image="images/eye_bg.svg"}

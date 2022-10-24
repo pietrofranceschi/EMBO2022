@@ -321,7 +321,7 @@
     <div class="slides">
 
 <section id="title-slide" class="center">
-  <h1 class="title">Processing LC-MS Metabolomics Data with <code>xcms</code></h1>
+  <h1 class="title">Processing LC-MS Metabolomics Data with xcms</h1>
   <p class="author">Pietro Franceschi</p>
 </section>
 
@@ -329,7 +329,6 @@
 <h2>What is <code>xcms</code></h2>
 <p>Framework for processing and visualization of chromatographically separated and single-spectra mass spectral data.</p>
 <p><a href="http://www.bioconductor.org/packages/release/bioc/html/xcms.html">xcms</a></p>
-<div class="fragment">
 <p>and still growing …</p>
 <p><a href="https://www.rformassspectrometry.org/">RforMassSpectrometry</a></p>
 <div class="quarto-layout-panel">
@@ -346,7 +345,6 @@
 <figure>
 <p><img data-src="images/spectra.png"></p>
 </figure>
-</div>
 </div>
 </div>
 </div>
@@ -399,7 +397,7 @@
 <section id="correlation-coefficients" class="slide level2">
 <h2>Correlation coefficients</h2>
 
-<img data-src="processing_LC_MS_files/figure-revealjs/unnamed-chunk-4-1.png" width="960" class="r-stretch quarto-figure-center"><p>Range of correlations: -0.87, 0.9</p>
+<img data-src="processing_LC_MS_files/figure-revealjs/unnamed-chunk-4-1.png" width="960" class="r-stretch quarto-figure-center"><p>Range of correlations: -0.86, 0.86</p>
 <p>We have relatively large values. Why?</p>
 </section>
 <section id="false-positives" class="slide level2" data-background-image="images/brain_bg.svg">
@@ -482,7 +480,8 @@
 <img data-src="processing_LC_MS_files/figure-revealjs/unnamed-chunk-7-1.png" width="960" class="r-stretch quarto-figure-center"></section>
 <section id="analytical-variability-in-lc-ms-intensity" class="slide level2">
 <h2>Analytical Variability in LC-MS: intensity</h2>
-</section>
+
+<img data-src="images/Total_ion_current.png" style="width:100.0%" class="r-stretch quarto-figure-center"></section>
 <section id="preprocessing" class="slide level2">
 <h2>Preprocessing</h2>
 <div>
@@ -567,127 +566,95 @@
 </div>
 </div>
 </div>
-</div>
-</section>
-<section>
-<section id="peak-picking" class="title-slide slide level1 center">
-<h1>Peak Picking</h1>
-
-</section>
-<section id="peaks-and-metabolites-facts" class="slide level2" data-background-image="images/brain_bg.svg">
-<h2>Peaks and metabolites: facts</h2>
-<div class="quarto-layout-panel">
-<div class="quarto-layout-row quarto-layout-valign-center">
-<div class="quarto-layout-cell" style="flex-basis: 76.9%;justify-content: center;">
-<ul>
-<li>A metabolite produce peaks in the extracted ion traces of its associated ions</li>
-<li>Different peaks in the same ion chromatograms are associated to different metabolites</li>
-<li>Peaks are not metabolites</li>
-<li>The same peak can slightly move across the injections</li>
-</ul>
-</div>
-<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 23.1%;justify-content: center;">
-<p>&nbsp;</p>
-</div>
-</div>
-</div>
-</section>
-<section id="matchedfilter" class="slide level2">
-<h2>MatchedFilter</h2>
-
-<img data-src="images/matchedFilter.png" style="width:60.0%" class="r-stretch quarto-figure-center"><div class="footer">
-<p>Anal Chem 2006 1;78(3):779-87. doi: 10.1021/ac051437y.</p>
-</div>
-</section>
-<section id="cent-wave" class="slide level2">
-<h2>Cent Wave</h2>
-
-<img data-src="images/cent_wave.png" style="width:50.0%" class="r-stretch quarto-figure-center"><div class="footer">
-<p>BMC Bioinformatics 9, 504 (2008). https://doi.org/10.1186/1471-2105-9-504</p>
-</div>
-</section>
-<section id="peak-intensity-into-and-maxo" class="slide level2">
-<h2>Peak Intensity: <code>into</code> and <code>maxo</code></h2>
-
-<img data-src="images/maxointo.png" style="width:50.0%" class="r-stretch quarto-figure-center"></section>
-<section id="things-to-always-consider" class="slide level2" data-background-image="images/eye_bg.svg">
-<h2>Things to always consider</h2>
-<div class="quarto-layout-panel">
-<div class="quarto-layout-row quarto-layout-valign-center">
-<div class="quarto-layout-cell" style="flex-basis: 76.9%;justify-content: center;">
-<ul>
-<li class="fragment">Real peaks can be really badly shaped</li>
-<li class="fragment">You are better than an algorithm … maybe AI will do well</li>
-<li class="fragment">Every algorithm has parameters to tune!</li>
-<li class="fragment">Look to the data!</li>
-<li class="fragment">Know how the instrument works</li>
-<li class="fragment">Check what happens to metabolites you know should be there</li>
-</ul>
-</div>
-<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 23.1%;justify-content: center;">
-<p>&nbsp;</p>
-</div>
-</div>
-</div>
-</section>
-<section id="section-1" class="slide level2">
-<h2></h2>
-<div class="quarto-layout-panel">
 <div class="quarto-layout-row quarto-layout-valign-top">
 <div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
 <p>&nbsp;</p>
 </div>
 </div>
 <div class="quarto-layout-row quarto-layout-valign-top">
-<div class="quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="images/RStudio.png"></p>
-</figure>
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<p>&nbsp;</p>
 </div>
 </div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<p>&nbsp;</p>
 </div>
 </div>
-</section></section>
-<section>
-<section id="retention-time-correction-and-feature-definition" class="title-slide slide level1 center">
-<h1>Retention time correction and feature definition</h1>
-
-</section>
-<section id="just-a-recap" class="slide level2">
-<h2>… Just a recap</h2>
-<ol type="1">
-<li>We converted the data files in an open source format (here mzML)</li>
-<li>We optimized the peak picking parameters working on a representative sample (Qc)</li>
-<li>We have been running peal picking on the full set of samples</li>
-<li>We have been saving the output somewhere, just to avoid re-starting from scratch ;-)</li>
-</ol>
-</section>
-<section id="what-next" class="slide level2">
-<h2>What Next</h2>
-<p>We have to merge the lists of <span style="color: red">chromatographic peaks</span> into a consensus list of <span style="color: red"> features peaks</span>, which will be the column of our data matrix</p>
-<ul>
-<li><em>chromatographich peaks</em> what was detected in the individual samples (mz,rt,intensity)</li>
-<li><em>features</em> consensus variables which are <em>grouping</em> several peaks coming from the different injections (mz,rt, intensity)</li>
-</ul>
-</section>
-<section id="grouping" class="slide level2">
-<h2>Grouping</h2>
-
-<img data-src="images/grouping.svg" style="width:60.0%" class="r-stretch quarto-figure-center"></section>
-<section id="retention-time-correction" class="slide level2">
-<h2>Retention time correction</h2>
-
-<img data-src="images/workflow.svg" style="width:100.0%" class="r-stretch quarto-figure-center"></section>
-<section id="dynamic-time-warping" class="slide level2">
-<h2>Dynamic Time Warping</h2>
-<p>Available in <code>xcms</code> trough <code>obiwarp</code></p>
-<div>
-<p>Mind the power of warping …</p>
-<div class="quarto-figure quarto-figure-center">
-<figure>
-<p><img data-src="images/warping.png" style="width:100.0%"></p>
-</figure>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<p>&nbsp;</p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<p>&nbsp;</p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<p>&nbsp;</p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<p>&nbsp;</p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<p>&nbsp;</p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<p>&nbsp;</p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<p>&nbsp;</p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<p>&nbsp;</p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<p>&nbsp;</p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<p>&nbsp;</p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<p>&nbsp;</p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<p>&nbsp;</p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<p>&nbsp;</p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<p>&nbsp;</p>
+</div>
+</div>
+<div class="quarto-layout-row quarto-layout-valign-top">
+<div class="quarto-figure-spacer quarto-layout-cell" style="flex-basis: 100.0%;justify-content: center;">
+<p>&nbsp;</p>
+</div>
 </div>
 </div>
 </section>
@@ -735,7 +702,7 @@
 </div>
 </div>
 </div>
-</section></section>
+</section>
 <section>
 <section id="bonus-section-fragmentation-data" class="title-slide slide level1 center">
 <h1>Bonus Section: fragmentation data</h1>
