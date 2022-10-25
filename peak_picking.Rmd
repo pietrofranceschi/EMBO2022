@@ -302,6 +302,7 @@ raw_data <- raw_data <- readMSData(
 And perform the peak picking with centwave
 
 ```{r}
+register(SerialParam()) 
 raw_data <- findChromPeaks(raw_data, param = cwp)
 ```
 
