@@ -7,6 +7,11 @@ This website collects the presentation and the practicals for the `xcms` section
 
 * [Lecture](processing_LC_MS.html)
 
+Here the [pdf](Processing_LC_MS.pdf)
+
+
+
+
 ## ... and the Rmds
 
 * [Inspecting Raw Data](Inspecting_raw_data.Rmd)
